@@ -47,6 +47,7 @@ namespace Kinectophone
         private void Window_Closed(object sender, EventArgs e)
         {
             nui.Uninitialize();
+            soundOut.SilenceAllNotes();
             soundOut.Close();
         }
 
@@ -78,6 +79,14 @@ namespace Kinectophone
                     {
                         soundOut.SendNoteOn(Channel.Channel1, Pitch.C4, soundVelocity);
                     }
+                    if ((double)handRight.Position.Y >= canvas1.Height / 2)
+                    {
+                        soundOut.SendNoteOn(Channel.Channel1, Pitch.D7, soundVelocity);
+                    }
+                    if ((double)handLeft.Position.Y >= canvas1.Height / 2)
+                    {
+                        soundOut.SendNoteOn(Channel.Channel1, Pitch.B3, soundVelocity);
+                    }
                 }
             }
         }
@@ -94,6 +103,18 @@ namespace Kinectophone
             Canvas.SetLeft(ellipse, jt.Position.X);
             Canvas.SetTop(ellipse, jt.Position.Y);
             return jt;
+        }
+
+        private void toggleSound_Click(object sender, RoutedEventArgs e)
+        {
+            if (soundOut.IsOpen)
+            {
+                soundOut.Close();
+            }
+            else
+            {
+                soundOut.Open();
+            }
         }
     }
 }
