@@ -1,0 +1,106 @@
+﻿<?xml version="1.0"?>
+<doc>
+  <assembly>
+    <name>ObservableKinect</name>
+  </assembly>
+  <members>
+    <member name="T:ObservableKinect.KinectSensor">
+      <summary>
+            Provides an interface to a single Kinect sensor with IObservables for all of its events
+            </summary>
+      <invariant>ourKinectSensors != null</invariant>
+      <invariant>ourKinectSensors.Length == Runtime.Kinects.Count</invariant>
+      <invariant>myIndex &gt;= 0 &amp;&amp; myIndex &lt; Runtime.Kinects.Count</invariant>
+      <invariant>_DepthFrames != null</invariant>
+      <invariant>_SkeletonFrames != null</invariant>
+      <invariant>_VideoFrames != null</invariant>
+    </member>
+    <member name="M:ObservableKinect.KinectSensor.Start(Microsoft.Research.Kinect.Nui.RuntimeOptions,System.Int32)">
+      <summary>
+            Starts the Kinect with the specified options.
+            </summary>
+      <param name="options">The options to run the Kinect with as a set of flags.</param>
+      <param name="kinectIndex">Index of the Kinect device you want to start, unless you have multiple Kinects attached you want to use the default value of 0.</param>
+      <returns>A sensor instance which will allow you to operate on the Kinect that was just started.</returns>
+      <requires>kinectIndex &gt;= 0 &amp;&amp; kinectIndex &lt; Runtime.Kinects.Count</requires>
+      <ensures>Contract.Result&lt;KinectSensor&gt;() != null &amp;&amp; ReferenceEquals(Contract.Result&lt;KinectSensor&gt;().Device, Runtime.Kinects[kinectIndex])</ensures>
+    </member>
+    <member name="M:ObservableKinect.KinectSensor.#ctor(System.Int32,Microsoft.Research.Kinect.Nui.RuntimeOptions)">
+      <summary>
+            Initializes a new instance of the <see cref="T:ObservableKinect.KinectSensor" /> class and initializes the attached Kinect device.
+            </summary>
+      <param name="index">The index of the sensor to attach to.</param>
+      <param name="options">The options to apply to the sensor to start with.</param>
+      <requires>index &gt;= 0 &amp;&amp; index &lt; Runtime.Kinects.Count</requires>
+    </member>
+    <member name="M:ObservableKinect.KinectSensor.StartDepthFrames(Microsoft.Research.Kinect.Nui.ImageResolution,System.Boolean,System.Int32)">
+      <summary>
+            Starts acquisition of depth frames.
+            </summary>
+      <param name="resolution">The resolution to use for the depth camera.</param>
+      <param name="includePlayerIndex">If set to <c>true</c> it includes the player index (id of tracked skeleton) in the event arguments.</param>
+      <param name="numBuffers">The number of image buffers to use. A larger number results in smoother playback but more latency as well. Default is 2.</param>
+      <requires>!this.DepthFramesRunning</requires>
+      <requires>numBuffers &gt; 0</requires>
+      <ensures>this.DepthFramesRunning</ensures>
+    </member>
+    <member name="M:ObservableKinect.KinectSensor.StartVideoFrames(Microsoft.Research.Kinect.Nui.ImageResolution,Microsoft.Research.Kinect.Nui.ImageType,System.Int32)">
+      <summary>
+            Starts acquisition of video frames.
+            </summary>
+      <param name="resolution">The resolution to use for the video camera.</param>
+      <param name="type">The type of image to acquire between RGB and YAV.</param>
+      <param name="numBuffers">The number of image buffers to use. A larger number results in smoother playback but more latency as well. Default is 2.</param>
+      <requires>!this.VideoFramesRunning</requires>
+    </member>
+    <member name="P:ObservableKinect.KinectSensor.Device">
+      <summary>
+            Gets the device if you need direct access. Bad things will probably happen if you try to manage it as well.
+            </summary>
+      <getter>
+        <ensures>Contract.Result&lt;Runtime&gt;() != null</ensures>
+      </getter>
+    </member>
+    <member name="P:ObservableKinect.KinectSensor.DepthFrames">
+      <summary>
+            Gets an Observable that produces a value every time a depth frame is captured.
+            </summary>
+      <getter>
+        <ensures>Contract.Result&lt;IObservable&lt;ImageFrameReadyEventArgs&gt;&gt;() != null</ensures>
+      </getter>
+    </member>
+    <member name="P:ObservableKinect.KinectSensor.DepthFramesRunning">
+      <summary>
+            Gets a value indicating whether depth frames are being acquired.
+            </summary>
+      <value>
+        <c>true</c> if depth frames are being acquired; otherwise, <c>false</c>.</value>
+    </member>
+    <member name="P:ObservableKinect.KinectSensor.SkeletonFrames">
+      <summary>
+            Gets an Observable that produces a value every time a skeleton frame is captured.
+            </summary>
+      <getter>
+        <ensures>Contract.Result&lt;IObservable&lt;SkeletonFrameReadyEventArgs&gt;&gt;() != null</ensures>
+      </getter>
+    </member>
+    <member name="P:ObservableKinect.KinectSensor.VideoFrames">
+      <summary>
+            Gets an Observable that produces a value every time a video frame is captured.
+            </summary>
+      <getter>
+        <ensures>Contract.Result&lt;IObservable&lt;ImageFrameReadyEventArgs&gt;&gt;() != null</ensures>
+      </getter>
+    </member>
+    <member name="P:ObservableKinect.KinectSensor.VideoFramesRunning">
+      <summary>
+            Gets a value indicating whether video frames are being acquired.
+            </summary>
+      <value>
+        <c>true</c> if video frames are being acquired; otherwise, <c>false</c>.</value>
+    </member>
+    <member name="M:ObservableKinect.KinectSensor.AddRuntimeOptions(ObservableKinect.KinectSensor,Microsoft.Research.Kinect.Nui.RuntimeOptions)">
+      <requires>sensor != null</requires>
+    </member>
+  </members>
+</doc>

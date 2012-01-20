@@ -1,0 +1,112 @@
+﻿<?xml version="1.0"?>
+<doc>
+  <assembly>
+    <name>ObservableKinect.Speech</name>
+  </assembly>
+  <members>
+    <member name="T:ObservableKinect.Speech.SpeechObserverHost">
+      <summary>
+            Hosts observers for the various events that come from the Kinect's speech engine
+            </summary>
+      <invariant>ourActiveHostsCounter &gt;= 0</invariant>
+      <invariant>ourKinectSource != null</invariant>
+      <invariant>ourSpeechEngine != null</invariant>
+      <invariant>ourCounterLock != null</invariant>
+      <invariant>myGrammars != null</invariant>
+      <invariant>_SpeechHypothesized != null</invariant>
+      <invariant>_SpeechRecognized != null</invariant>
+      <invariant>_SpeechRecognitionRejected != null</invariant>
+      <invariant>_SpeechDetected != null</invariant>
+    </member>
+    <member name="M:ObservableKinect.Speech.SpeechObserverHost.#ctor(System.Collections.Generic.IEnumerable{System.String})">
+      <summary>
+            Initializes a new instance of the <see cref="T:ObservableKinect.Speech.SpeechObserverHost" /> class.
+            </summary>
+      <param name="keyWords">The keywords you want the speech engine to recognize.</param>
+      <requires>keyWords != null</requires>
+      <requires>keyWords.Any()</requires>
+    </member>
+    <member name="M:ObservableKinect.Speech.SpeechObserverHost.#ctor(System.String[])">
+      <summary>
+            Initializes a new instance of the <see cref="T:ObservableKinect.Speech.SpeechObserverHost" /> class.
+            </summary>
+      <param name="keyWords">The keywords you want the speech engine to recognize.</param>
+      <requires>keyWords != null</requires>
+      <requires>keyWords.Any()</requires>
+    </member>
+    <member name="M:ObservableKinect.Speech.SpeechObserverHost.#ctor(Microsoft.Speech.Recognition.Grammar[])">
+      <summary>
+            Initializes a new instance of the <see cref="T:ObservableKinect.Speech.SpeechObserverHost" /> class.
+            </summary>
+      <param name="grammars">The grammars you want the speech engine to recognize.</param>
+      <requires>grammars != null</requires>
+      <requires>grammars.Any()</requires>
+    </member>
+    <member name="M:ObservableKinect.Speech.SpeechObserverHost.#ctor(System.Collections.Generic.IEnumerable{Microsoft.Speech.Recognition.Grammar})">
+      <summary>
+            Initializes a new instance of the <see cref="T:ObservableKinect.Speech.SpeechObserverHost" /> class.
+            </summary>
+      <param name="grammars">The grammars you want the speech engine to recognize.</param>
+      <requires>grammars != null</requires>
+      <requires>grammars.Any()</requires>
+    </member>
+    <member name="M:ObservableKinect.Speech.SpeechObserverHost.Dispose">
+      <summary>
+            Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+            </summary>
+    </member>
+    <member name="M:ObservableKinect.Speech.SpeechObserverHost.Dispose(System.Boolean)">
+      <summary>
+             Dispose(bool disposing) executes in two distinct scenarios.
+             If disposing equals true, the method has been called directly
+             or indirectly by a user's code. Managed and unmanaged resources
+             can be disposed.
+             If disposing equals false, the method has been called by the
+             runtime from inside the finalizer and you should not reference
+             other objects. Only unmanaged resources can be disposed.
+             </summary>
+    </member>
+    <member name="M:ObservableKinect.Speech.SpeechObserverHost.Finalize">
+      <summary>
+            Releases unmanaged resources and performs other cleanup operations before the
+            <see cref="T:ObservableKinect.Speech.SpeechObserverHost" /> is reclaimed by garbage collection.
+            </summary>
+    </member>
+    <member name="P:ObservableKinect.Speech.SpeechObserverHost.SpeechHypothesized">
+      <summary>
+            Recognized a word or words that may be a component of multiple complete phrases.
+            </summary>
+      <getter>
+        <ensures>Contract.Result&lt;IObservable&lt;SpeechHypothesizedEventArgs&gt;&gt;() != null</ensures>
+      </getter>
+    </member>
+    <member name="P:ObservableKinect.Speech.SpeechObserverHost.SpeechRecognized">
+      <summary>
+            Receives input that matches any of its grammars.
+            </summary>
+      <getter>
+        <ensures>Contract.Result&lt;IObservable&lt;SpeechRecognizedEventArgs&gt;&gt;() != null</ensures>
+      </getter>
+    </member>
+    <member name="P:ObservableKinect.Speech.SpeechObserverHost.SpeechRecognitionRejected">
+      <summary>
+            Receives input that does not match any of its grammars.
+            </summary>
+      <getter>
+        <ensures>Contract.Result&lt;IObservable&lt;SpeechRecognitionRejectedEventArgs&gt;&gt;() != null</ensures>
+      </getter>
+    </member>
+    <member name="P:ObservableKinect.Speech.SpeechObserverHost.SpeechDetected">
+      <summary>
+            Raised when speech can be identified.
+            </summary>
+      <getter>
+        <ensures>Contract.Result&lt;IObservable&lt;SpeechDetectedEventArgs&gt;&gt;() != null</ensures>
+      </getter>
+    </member>
+    <member name="M:ObservableKinect.Speech.SpeechObserverHost.EventFilterAndArgsSelector``1(System.IObservable{System.Reactive.EventPattern{``0}})">
+      <requires>xs != null</requires>
+      <ensures>Contract.Result&lt;IObservable&lt;T&gt;&gt;() != null</ensures>
+    </member>
+  </members>
+</doc>
