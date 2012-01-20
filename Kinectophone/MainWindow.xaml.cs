@@ -14,8 +14,8 @@ using System.Windows.Shapes;
 using Microsoft.Research.Kinect.Nui;
 using Microsoft.Research.Kinect.Audio;
 using Coding4Fun.Kinect.Wpf;
-
-
+using System.Runtime.InteropServices;
+using Midi;
 
 namespace Kinectophone
 {
@@ -25,7 +25,8 @@ namespace Kinectophone
     public partial class MainWindow : Window
     {
         Runtime nui = Runtime.Kinects[0];
-
+        OutputDevice soundOut = OutputDevice.InstalledDevices[0];
+ 
         public MainWindow()
         {
             InitializeComponent();
@@ -39,15 +40,20 @@ namespace Kinectophone
             nui.VideoStream.Open(ImageStreamType.Video, 2, ImageResolution.Resolution640x480, ImageType.Color);
 
             nui.SkeletonFrameReady += new EventHandler<SkeletonFrameReadyEventArgs>(nui_SkeletonFrameReady);
+
+            soundOut.Open();
         }
 
         private void Window_Closed(object sender, EventArgs e)
         {
             nui.Uninitialize();
+            soundOut.Close();
         }
 
         void nui_SkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
         {
+            int soundVelocity = 120;
+
             SkeletonData skeleton = (from s in e.SkeletonFrame.Skeletons
                                      where s.TrackingState == SkeletonTrackingState.Tracked
                                      select s).FirstOrDefault();
@@ -65,6 +71,14 @@ namespace Kinectophone
                 Joint handLeft = getAndDrawJoint(skeleton, JointID.HandLeft, handLeftEllipse);
                 Joint handRight = getAndDrawJoint(skeleton, JointID.HandRight, handRightEllipse);
                 Joint spine = getAndDrawJoint(skeleton, JointID.Spine, spineEllipse);
+
+                if (soundOut.IsOpen)
+                {
+                    if (canvas1.Height / 3 >= (double)head.Position.Y)
+                    {
+                        soundOut.SendNoteOn(Channel.Channel1, Pitch.C4, soundVelocity);
+                    }
+                }
             }
         }
 
