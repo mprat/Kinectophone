@@ -16,6 +16,7 @@ using Microsoft.Research.Kinect.Audio;
 using Coding4Fun.Kinect.Wpf;
 
 
+
 namespace Kinectophone
 {
     /// <summary>
@@ -53,15 +54,32 @@ namespace Kinectophone
 
             if (skeleton.TrackingState == SkeletonTrackingState.Tracked)
             {
-                Joint head = skeleton.Joints[JointID.Head].ScaleTo((int)canvas1.Height, (int)canvas1.Width, .5f, .5f);
-                Canvas.SetLeft(headEllipse, head.Position.X);
-                Canvas.SetTop(headEllipse, head.Position.Y);
+                Joint head = getAndDrawJoint(skeleton, JointID.Head, headEllipse);
+                Joint shoulderCenter = getAndDrawJoint(skeleton, JointID.ShoulderCenter, shoulderCenterEllipse);
+                Joint shoulderLeft = getAndDrawJoint(skeleton, JointID.ShoulderLeft, shoulderLeftEllipse);
+                Joint shoulderRight = getAndDrawJoint(skeleton, JointID.ShoulderRight, shoulderRightEllipse);
+                Joint elbowLeft = getAndDrawJoint(skeleton, JointID.ElbowLeft, elbowLeftEllipse);
+                Joint elbowRight = getAndDrawJoint(skeleton, JointID.ElbowRight, elbowRightEllipse);
+                Joint wristLeft = getAndDrawJoint(skeleton, JointID.WristLeft, wristLeftEllipse);
+                Joint wristRight = getAndDrawJoint(skeleton, JointID.WristRight, wristRightEllipse);
+                Joint handLeft = getAndDrawJoint(skeleton, JointID.HandLeft, handLeftEllipse);
+                Joint handRight = getAndDrawJoint(skeleton, JointID.HandRight, handRightEllipse);
+                Joint spine = getAndDrawJoint(skeleton, JointID.Spine, spineEllipse);
             }
         }
 
         void nui_VideoFrameReady(object sender, ImageFrameReadyEventArgs e)
         {
             kinectColorOut.Source = e.ImageFrame.ToBitmapSource();
+        }
+
+        private Joint getAndDrawJoint(SkeletonData skel, JointID jointID, UIElement ellipse)
+        {
+            Joint jt = skel.Joints[jointID].ScaleTo((int)canvas1.Height, (int)canvas1.Width, .5f, .5f);
+
+            Canvas.SetLeft(ellipse, jt.Position.X);
+            Canvas.SetTop(ellipse, jt.Position.Y);
+            return jt;
         }
     }
 }

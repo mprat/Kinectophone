@@ -5,7 +5,17 @@
     <Grid Name="kinectGrid" Height="650" Width="650">
         <Image Height="550" HorizontalAlignment="Left" Margin="34,42,0,0" Name="kinectColorOut" Stretch="Fill" VerticalAlignment="Top" Width="550" />
         <Canvas Height="550" HorizontalAlignment="Left" Margin="34,42,0,0" Name="canvas1" VerticalAlignment="Top" Width="550">
-            <Ellipse Canvas.Left="6" Canvas.Top="6" Height="20" Name="headEllipse" Stroke="Aqua" Width="20" Fill="Aqua"/>
+            <Ellipse Canvas.Left="6" Canvas.Top="6" Height="20" Name="headEllipse" Stroke="AliceBlue" Width="20" Fill="AliceBlue"/>
+            <Ellipse Canvas.Left="6" Canvas.Top="6" Height="20" Name="shoulderCenterEllipse" Stroke="Aqua" Width="20" Fill="Aqua"/>
+            <Ellipse Canvas.Left="6" Canvas.Top="6" Height="20" Name="shoulderLeftEllipse" Stroke="Aquamarine" Width="20" Fill="Aquamarine"/>
+            <Ellipse Canvas.Left="6" Canvas.Top="6" Height="20" Name="shoulderRightEllipse" Stroke="Azure" Width="20" Fill="Azure"/>
+            <Ellipse Canvas.Left="6" Canvas.Top="6" Height="20" Name="elbowLeftEllipse" Stroke="OldLace" Width="20" Fill="OldLace"/>
+            <Ellipse Canvas.Left="6" Canvas.Top="6" Height="20" Name="elbowRightEllipse" Stroke="Olive" Width="20" Fill="Olive"/>
+            <Ellipse Canvas.Left="6" Canvas.Top="6" Height="20" Name="wristLeftEllipse" Stroke="Orange" Width="20" Fill="Orange"/>
+            <Ellipse Canvas.Left="6" Canvas.Top="6" Height="20" Name="wristRightEllipse" Stroke="OrangeRed" Width="20" Fill="OrangeRed"/>
+            <Ellipse Canvas.Left="6" Canvas.Top="6" Height="20" Name="handLeftEllipse" Stroke="Orchid" Width="20" Fill="Orchid"/>
+            <Ellipse Canvas.Left="6" Canvas.Top="6" Height="20" Name="handRightEllipse" Stroke="PaleGreen" Width="20" Fill="PaleGreen"/>
+            <Ellipse Canvas.Left="6" Canvas.Top="6" Height="20" Name="spineEllipse" Stroke="PaleTurquoise" Width="20" Fill="PaleTurquoise"/>
         </Canvas>
     </Grid>
 </Window>
