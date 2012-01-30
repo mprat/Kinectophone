@@ -161,6 +161,7 @@ namespace Kinectophone
             }
             else if (this.dictType == RegionToPitchDictType.Piano)
             {
+                // TODO: eventually be able to choose what chord/scale you want
                 for (int j = 0; j < this.pitchRegionsY; j++)
                 {
 
@@ -172,6 +173,21 @@ namespace Kinectophone
             }
 
             return intToPitch;
+        }
+
+        private void drawGridBoundaries()
+        {
+            double partWidth = canvas1.Width / this.pitchRegionsX;
+            double partHeight = canvas1.Height / this.pitchRegionsY;
+
+            double workingCoord = 0;
+
+            for (int i = 0; i < this.pitchRegionsX; i++)
+            {
+                Line templine = new Line();
+
+                canvas1.Children.Add(templine);
+            }
         }
 
         private Tuple<int, int> coordToRegion(double x, double y)
@@ -208,7 +224,7 @@ namespace Kinectophone
             else
             {
                 this.soundOut.Open();
-                Console.Out.Write("suond open\n");
+                Console.Out.Write("sound open\n");
             }
         }
 
