@@ -56,6 +56,12 @@
     <Reference Include="Midi">
       <HintPath>..\..\..\..\..\Downloads\midi-dot-net_1.1.0\Midi.dll</HintPath>
     </Reference>
+    <Reference Include="NAudio">
+      <HintPath>..\..\..\..\..\Downloads\NAudio\NAudio.dll</HintPath>
+    </Reference>
+    <Reference Include="NAudio.WindowsMediaFormat">
+      <HintPath>..\..\..\..\..\Downloads\NAudio\NAudio.WindowsMediaFormat.dll</HintPath>
+    </Reference>
     <Reference Include="ObservableKinect">
       <HintPath>..\packages\ObservableKinect.0.8.0.0\lib\net40\ObservableKinect.dll</HintPath>
     </Reference>

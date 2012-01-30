@@ -12,10 +12,18 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Research.Kinect.Nui;
-using Microsoft.Research.Kinect.Audio;
+//using Microsoft.Research.Kinect.Audio;
 using Coding4Fun.Kinect.Wpf;
-using System.Runtime.InteropServices;
+//using System.Runtime.InteropServices;
 using Midi;
+//using System.Media;
+//using NAudio.CoreAudioApi;
+//using NAudio.Dsp;
+//using NAudio.Midi;
+//using NAudio.Mixer;
+//using NAudio.Sfz;
+//using NAudio.Utils;
+//using NAudio.Wave;
 
 namespace Kinectophone
 {
@@ -24,12 +32,21 @@ namespace Kinectophone
     /// </summary>
     public partial class MainWindow : Window
     {
-        Runtime nui = Runtime.Kinects[0];
-        OutputDevice soundOut = OutputDevice.InstalledDevices[0];
-        int pitchRegionsX = 6;
-        int pitchRegionsY = 6;
-        Random random = new Random();
-        Dictionary<Tuple<int, int>, Pitch> regionToPitch = new Dictionary<Tuple<int, int>, Pitch>();
+        private Runtime nui = Runtime.Kinects[0];
+        private OutputDevice soundOut = OutputDevice.InstalledDevices[0];
+        private int pitchRegionsX = 6;
+        private int pitchRegionsY = 6;
+        private Random random = new Random();
+        private Dictionary<Tuple<int, int>, Pitch> regionToPitch = new Dictionary<Tuple<int, int>, Pitch>();
+
+        enum RegionToPitchDictType { Random, Piano, ModBeats };
+
+        //music setting booleans (defaults)
+        private bool multiple = true;
+        private RegionToPitchDictType dictType = RegionToPitchDictType.Random;
+
+        //private IWavePlayer waveOut;
+        //private SoundPlayer seedSoundPlayer = new SoundPlayer();
 
         public MainWindow()
         {
@@ -38,33 +55,33 @@ namespace Kinectophone
 
         private void Window_Loaded(object sender, EventArgs e)
         {
-            nui.Initialize(RuntimeOptions.UseSkeletalTracking | RuntimeOptions.UseColor);
+            this.nui.Initialize(RuntimeOptions.UseSkeletalTracking | RuntimeOptions.UseColor);
 
-            nui.VideoFrameReady += new EventHandler<ImageFrameReadyEventArgs>(nui_VideoFrameReady);
-            nui.VideoStream.Open(ImageStreamType.Video, 2, ImageResolution.Resolution640x480, ImageType.Color);
+            this.nui.VideoFrameReady += new EventHandler<ImageFrameReadyEventArgs>(nui_VideoFrameReady);
+            this.nui.VideoStream.Open(ImageStreamType.Video, 2, ImageResolution.Resolution640x480, ImageType.Color);
 
-            nui.SkeletonFrameReady += new EventHandler<SkeletonFrameReadyEventArgs>(nui_SkeletonFrameReady);
+            this.nui.SkeletonFrameReady += new EventHandler<SkeletonFrameReadyEventArgs>(nui_SkeletonFrameReady);
 
-            regionToPitch = regionToPitchDict();
+            this.regionToPitch = regionToPitchDict();
             //soundOut.Open();
         }
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            nui.Uninitialize();
-            soundOut.SilenceAllNotes();
-            soundOut.Close();
+            this.nui.Uninitialize();
+            this.soundOut.SilenceAllNotes();
+            this.soundOut.Close();
         }
 
         void nui_SkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
         {
             int soundVelocity = 120;
 
-            SkeletonData skeleton = (from s in e.SkeletonFrame.Skeletons
+           SkeletonData skeleton = (from s in e.SkeletonFrame.Skeletons
                                      where s.TrackingState == SkeletonTrackingState.Tracked
                                      select s).FirstOrDefault();
 
-            if (skeleton.TrackingState == SkeletonTrackingState.Tracked)
+            if (skeleton != null && skeleton.TrackingState == SkeletonTrackingState.Tracked)
             {
                 Joint head = getAndDrawJoint(skeleton, JointID.Head, headEllipse);
                 Joint shoulderCenter = getAndDrawJoint(skeleton, JointID.ShoulderCenter, shoulderCenterEllipse);
@@ -80,11 +97,15 @@ namespace Kinectophone
 
                 Joint[] noteJoints = new Joint[11]{head, shoulderCenter, shoulderLeft, shoulderRight, elbowLeft, elbowRight, wristLeft, wristRight, handLeft, handRight, spine};
 
-                if (soundOut.IsOpen)
+                if (this.soundOut.IsOpen)
                 {
                     foreach (Joint noteJoint in noteJoints)
                     {
-                        soundOut.SendNoteOn(Channel.Channel1, regionToPitch[coordToRegion((double)noteJoint.Position.X, (double)noteJoint.Position.Y)], soundVelocity);
+                        if (!multiple)
+                        {
+                            this.soundOut.SilenceAllNotes();
+                        }
+                        this.soundOut.SendNoteOn(Channel.Channel1, regionToPitch[coordToRegion((double)noteJoint.Position.X, (double)noteJoint.Position.Y)], soundVelocity);
                     }
                 }
             }
@@ -92,7 +113,7 @@ namespace Kinectophone
 
         void nui_VideoFrameReady(object sender, ImageFrameReadyEventArgs e)
         {
-            kinectColorOut.Source = e.ImageFrame.ToBitmapSource();
+            this.kinectColorOut.Source = e.ImageFrame.ToBitmapSource();
         }
 
         private Joint getAndDrawJoint(SkeletonData skel, JointID jointID, UIElement ellipse)
@@ -101,6 +122,8 @@ namespace Kinectophone
 
             Canvas.SetLeft(ellipse, jt.Position.X);
             Canvas.SetTop(ellipse, jt.Position.Y);
+
+            ellipse.Visibility = System.Windows.Visibility.Visible;
             return jt;
         }
 
@@ -126,12 +149,26 @@ namespace Kinectophone
 
             Dictionary<Tuple<int, int>, Pitch> intToPitch = new Dictionary<Tuple<int, int>, Pitch>();
 
-            for (int i = 0; i < pitchRegionsX; i++)
+            if (this.dictType == RegionToPitchDictType.Random)
             {
-                for (int j = 0; j < pitchRegionsY; j++)
+                for (int i = 0; i < this.pitchRegionsX; i++)
                 {
-                    intToPitch.Add(Tuple.Create(i, j), pitches[random.Next(0, pitches.Length)]);
+                    for (int j = 0; j < this.pitchRegionsY; j++)
+                    {
+                        intToPitch.Add(Tuple.Create(i, j), pitches[random.Next(0, pitches.Length)]);
+                    }
                 }
+            }
+            else if (this.dictType == RegionToPitchDictType.Piano)
+            {
+                for (int j = 0; j < this.pitchRegionsY; j++)
+                {
+
+                }
+            }
+            else if (this.dictType == RegionToPitchDictType.ModBeats)
+            {
+
             }
 
             return intToPitch;
@@ -142,7 +179,7 @@ namespace Kinectophone
             double workingCoord = 0;
 
             //break x
-            double partWidth = canvas1.Width / pitchRegionsX;
+            double partWidth = canvas1.Width / this.pitchRegionsX;
             while (Math.Abs(x - workingCoord) > partWidth)
             {
                 workingCoord += partWidth;
@@ -150,7 +187,7 @@ namespace Kinectophone
             int xTuple = (int)(workingCoord / partWidth);
             workingCoord = 0;
             //break y
-            double partHeight = canvas1.Height / pitchRegionsY;
+            double partHeight = canvas1.Height / this.pitchRegionsY;
             while (Math.Abs(y - workingCoord) > partHeight)
             {
                 workingCoord += partHeight;
@@ -163,14 +200,22 @@ namespace Kinectophone
 
         private void toggleSound_Click(object sender, RoutedEventArgs e)
         {
-            if (soundOut.IsOpen)
+            if (this.soundOut.IsOpen)
             {
-                soundOut.Close();
+                this.soundOut.Close();
+                Console.Out.Write("sound closed\n");
             }
             else
             {
-                soundOut.Open();
+                this.soundOut.Open();
+                Console.Out.Write("suond open\n");
             }
+        }
+
+        private void multNoteCheck_Checked(object sender, RoutedEventArgs e)
+        {
+            this.multiple = !this.multiple;
+            Console.Out.Write("Multiple notes are " + this.multiple);
         }
     }
 }
