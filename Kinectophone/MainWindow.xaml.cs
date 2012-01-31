@@ -180,6 +180,8 @@ namespace Kinectophone
                         double yreg = (double)noteJoint.Position.Y;
                         Tuple<int, int> pitchreg = coordToRegion(xreg, yreg);
 
+                        Console.Out.WriteLine(pitchreg.ToString());
+
                         if (dictType == RegionToPitchDictType.Piano)
                         {
                             this.soundOut.SendNoteOff(Channel.Channel1, pitchToPlay, soundVelocity);
@@ -196,10 +198,11 @@ namespace Kinectophone
                                 if (!(pitchToPlay.Equals(Pitch.GSharpNeg1)))
                                 {
                                     this.soundOut.SendNoteOn(Channel.Channel1, pitchToPlay, soundVelocity);
+
+                                    Console.Out.WriteLine(pitchToPlay.ToString());
                                 }
                             }
 
-                            //Console.Out.WriteLine(regionToPitch[pitchreg].ToString());
                         }
                     }
                 }
