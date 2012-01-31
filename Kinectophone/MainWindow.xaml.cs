@@ -282,6 +282,7 @@ namespace Kinectophone
         {
             Rectangle c = new Rectangle();
 
+            canvas1.Children.Add(c);
         }
 
         private void setPianoParams()
