@@ -3,8 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="MainWindow" Height="800" Width="1200" Loaded="Window_Loaded">
     <Grid Name="kinectGrid" Height="774" Width="1171">
-        <Canvas Height="720" HorizontalAlignment="Left" Margin="34,25,0,0" Name="canvas1" VerticalAlignment="Top" Width="816">
-        <Image Height="720" HorizontalAlignment="Left" Margin="34,0,0,0" Name="kinectColorOut" Stretch="Fill" VerticalAlignment="Top" Width="816" />
+        <Canvas Height="720" HorizontalAlignment="Left" Margin="35,20,0,0" Name="canvas1" VerticalAlignment="Top" Width="816">
+        <Image Height="720" HorizontalAlignment="Left" Margin="34,0,0,0" Name="kinectColorOut" Stretch="Fill" VerticalAlignment="Top" Width="816" Canvas.Top="-1" Canvas.Left="-34" />
             <Ellipse Visibility="Hidden" Canvas.Left="6" Canvas.Top="6" Height="20" Name="headEllipse" Stroke="AliceBlue" Width="20" Fill="AliceBlue"/>
             <Ellipse Visibility="Hidden" Canvas.Left="6" Canvas.Top="6" Height="20" Name="shoulderCenterEllipse" Stroke="Aqua" Width="20" Fill="Aqua"/>
             <Ellipse Visibility="Hidden" Canvas.Left="6" Canvas.Top="6" Height="20" Name="shoulderLeftEllipse" Stroke="Aquamarine" Width="20" Fill="Aquamarine"/>
@@ -20,7 +20,7 @@
         </Canvas>
         <Button Content="Toggle Sound" Height="50" HorizontalAlignment="Left" Margin="894,42,0,0" Name="toggleSound" VerticalAlignment="Top" Width="208" Click="toggleSound_Click" />
         <CheckBox Content="Multiple notes" Height="16" HorizontalAlignment="Left" Margin="945,109,0,0" Name="multNoteCheck" VerticalAlignment="Top" IsChecked="True"/>
-        <ComboBox Height="23" HorizontalAlignment="Left" Margin="945,190,0,0" Name="modeComboBox" VerticalAlignment="Top" Width="120" SelectionChanged="modeComboBox_SelectionChanged">
+        <ComboBox Height="23" HorizontalAlignment="Left" Margin="945,190,0,0" Name="modeComboBox" VerticalAlignment="Top" Width="120">
             <ComboBoxItem Content="Random" IsSelected="True" />
             <ComboBoxItem Content="Piano"/>
             <ComboBoxItem Content="Mod" />

@@ -28,6 +28,8 @@ using Midi;
 
 //TODO: make sure canvas1 and kinectColorOut have the same dimensions
 //TODO: set ellipses invisible when they are out of bounds
+//TODO: fix checkbox for piano mode
+//TODO: text labeling the notes
 
 
 namespace Kinectophone
@@ -79,8 +81,16 @@ namespace Kinectophone
 
             this.nui.SkeletonFrameReady += new EventHandler<SkeletonFrameReadyEventArgs>(nui_SkeletonFrameReady);
 
-            this.regionToPitch = regionToPitchDict();
             this.dictType = RegionToPitchDictType.Piano;
+            this.regionToPitch = regionToPitchDict();
+
+            switch (this.dictType)
+            {
+                case RegionToPitchDictType.Piano:
+                    setPianoParams();
+                    drawPianoSquares();
+                    break;
+            }
 
             //foreach (Pitch p in this.regionToPitch.Values)
             //{
@@ -160,7 +170,7 @@ namespace Kinectophone
                         {
                             this.soundOut.SilenceAllNotes();
                         }
-
+                        
                         double xreg = (double)noteJoint.Position.X;
                         double yreg = (double)noteJoint.Position.Y;
                         Tuple<int, int> pitchreg = coordToRegion(xreg, yreg);
@@ -234,33 +244,33 @@ namespace Kinectophone
                 intToPitch = new Dictionary<Tuple<int, int>, Pitch>();
                 
                 // TODO: eventually be able to choose what chord/scale you want
-                setPianoParams();
+                //setPianoParams();
 
                 //for now, manually set pitches for the piano until can do something better
                 intToPitch.Add(Tuple.Create(2, 2), Pitch.C4);
-                intToPitch.Add(Tuple.Create(2, 3), Pitch.C4);
-                intToPitch.Add(Tuple.Create(2, 4), Pitch.D4);
-                intToPitch.Add(Tuple.Create(2, 5), Pitch.D4);
-                intToPitch.Add(Tuple.Create(2, 6), Pitch.E4);
-                intToPitch.Add(Tuple.Create(2, 7), Pitch.E4);
-                intToPitch.Add(Tuple.Create(2, 8), Pitch.F4);
-                intToPitch.Add(Tuple.Create(2, 9), Pitch.F4);
-                intToPitch.Add(Tuple.Create(2, 10), Pitch.G4);
-                intToPitch.Add(Tuple.Create(2, 11), Pitch.G4);
-                intToPitch.Add(Tuple.Create(2, 12), Pitch.A4);
-                intToPitch.Add(Tuple.Create(2, 13), Pitch.A4);
-                intToPitch.Add(Tuple.Create(2, 14), Pitch.B4);
-                intToPitch.Add(Tuple.Create(2, 15), Pitch.B4);
-                intToPitch.Add(Tuple.Create(1, 3), Pitch.CSharp4);
-                intToPitch.Add(Tuple.Create(1, 4), Pitch.CSharp4);
-                intToPitch.Add(Tuple.Create(1, 5), Pitch.DSharp4);
-                intToPitch.Add(Tuple.Create(1, 6), Pitch.DSharp4);
-                intToPitch.Add(Tuple.Create(1, 9), Pitch.FSharp4);
-                intToPitch.Add(Tuple.Create(1, 10), Pitch.FSharp4);
-                intToPitch.Add(Tuple.Create(1, 11), Pitch.GSharp4);
-                intToPitch.Add(Tuple.Create(1, 12), Pitch.GSharp4);
-                intToPitch.Add(Tuple.Create(1, 13), Pitch.ASharp4);
-                intToPitch.Add(Tuple.Create(1, 14), Pitch.ASharp4);
+                intToPitch.Add(Tuple.Create(3, 2), Pitch.C4);
+                intToPitch.Add(Tuple.Create(4, 2), Pitch.D4);
+                intToPitch.Add(Tuple.Create(5, 2), Pitch.D4);
+                intToPitch.Add(Tuple.Create(6, 2), Pitch.E4);
+                intToPitch.Add(Tuple.Create(7, 2), Pitch.E4);
+                intToPitch.Add(Tuple.Create(8, 2), Pitch.F4);
+                intToPitch.Add(Tuple.Create(9, 2), Pitch.F4);
+                intToPitch.Add(Tuple.Create(10, 2), Pitch.G4);
+                intToPitch.Add(Tuple.Create(11, 2), Pitch.G4);
+                intToPitch.Add(Tuple.Create(12, 2), Pitch.A4);
+                intToPitch.Add(Tuple.Create(13, 2), Pitch.A4);
+                intToPitch.Add(Tuple.Create(14, 2), Pitch.B4);
+                intToPitch.Add(Tuple.Create(15, 2), Pitch.B4);
+                intToPitch.Add(Tuple.Create(3, 1), Pitch.CSharp4);
+                intToPitch.Add(Tuple.Create(4, 1), Pitch.CSharp4);
+                intToPitch.Add(Tuple.Create(5, 1), Pitch.DSharp4);
+                intToPitch.Add(Tuple.Create(6, 1), Pitch.DSharp4);
+                intToPitch.Add(Tuple.Create(9, 1), Pitch.FSharp4);
+                intToPitch.Add(Tuple.Create(10, 1), Pitch.FSharp4);
+                intToPitch.Add(Tuple.Create(11, 1), Pitch.GSharp4);
+                intToPitch.Add(Tuple.Create(12, 1), Pitch.GSharp4);
+                intToPitch.Add(Tuple.Create(13, 1), Pitch.ASharp4);
+                intToPitch.Add(Tuple.Create(14, 1), Pitch.ASharp4);
             }
             else if (this.dictType == RegionToPitchDictType.ModBeats)
             {
@@ -280,9 +290,27 @@ namespace Kinectophone
         //only draw the squares for the piano so you know where the notes are
         private void drawPianoSquares()
         {
-            Rectangle c = new Rectangle();
+            for (int i = 1; i <= 7; i++)
+            {
+                setRectangleParams(new Rectangle(), 2, i);
 
-            canvas1.Children.Add(c);
+                if (i != 3 && i != 7)
+                {
+                    setRectangleParams(new Rectangle(), 1, i + .5);
+                }
+            }
+        }
+
+        private void setRectangleParams(Rectangle rect, double xmult, double ymult)
+        {
+            rect.Stroke = System.Windows.Media.Brushes.Cyan;
+            rect.StrokeThickness = 2;
+            rect.Width = 2 * canvas1.Width / this.pitchRegionsX;
+            rect.Height = canvas1.Height / this.pitchRegionsY;
+            canvas1.Children.Add(rect);
+
+            Canvas.SetTop(rect, rect.Height * xmult);
+            Canvas.SetLeft(rect, rect.Width * ymult);
         }
 
         private void setPianoParams()
@@ -334,23 +362,6 @@ namespace Kinectophone
             {
                 this.soundOut.Open();
                 Console.Out.Write("sound open\n");
-            }
-        }
-
-        private void modeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            string comboString = modeComboBox.SelectedItem.ToString();
-            if (comboString == "Random")
-            {
-                dictType = RegionToPitchDictType.Random;
-            }
-            else if (comboString == "Piano")
-            {
-                dictType = RegionToPitchDictType.Piano;
-            }
-            else if (comboString == "Mod")
-            {
-
             }
         }
     }
