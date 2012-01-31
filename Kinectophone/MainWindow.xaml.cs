@@ -59,6 +59,8 @@ namespace Kinectophone
         private Joint handRight = new Joint();
         private Joint spine = new Joint();
 
+        private Pitch pitchToPlay = Pitch.GSharpNeg1; //this is the "zero" of our pitches
+
         enum RegionToPitchDictType { Random, Piano, ModBeats };
 
         //music setting booleans (defaults)
@@ -83,6 +85,9 @@ namespace Kinectophone
 
             this.dictType = RegionToPitchDictType.Piano;
             this.regionToPitch = regionToPitchDict();
+
+            canvas1.Height = kinectColorOut.Height;
+            canvas1.Width = kinectColorOut.Width;
 
             switch (this.dictType)
             {
@@ -175,12 +180,24 @@ namespace Kinectophone
                         double yreg = (double)noteJoint.Position.Y;
                         Tuple<int, int> pitchreg = coordToRegion(xreg, yreg);
 
-                        //Console.Out.WriteLine(pitchreg.ToString());
-
+                        if (dictType == RegionToPitchDictType.Piano)
+                        {
+                            this.soundOut.SendNoteOff(Channel.Channel1, pitchToPlay, soundVelocity);
+                        }
+                        
                         //only play the sound if the key is contained in the dictionary
                         if (regionToPitch.ContainsKey(pitchreg))
                         {
-                            this.soundOut.SendNoteOn(Channel.Channel1, regionToPitch[pitchreg], soundVelocity);
+                            if (!(regionToPitch[pitchreg].Equals(pitchToPlay)))
+                            {
+                                pitchToPlay = regionToPitch[pitchreg];
+
+                                //make sure the pitch is not "zero"
+                                if (!(pitchToPlay.Equals(Pitch.GSharpNeg1)))
+                                {
+                                    this.soundOut.SendNoteOn(Channel.Channel1, pitchToPlay, soundVelocity);
+                                }
+                            }
 
                             //Console.Out.WriteLine(regionToPitch[pitchreg].ToString());
                         }
@@ -209,6 +226,7 @@ namespace Kinectophone
         //it sets the int, int region mapping to the pitch, so it already knows how many regions there are
         private Dictionary<Tuple<int, int>, Pitch> regionToPitchDict()
         {
+            //Pitch.GSharpNeg1 is not included because it is used as "zero"
             Pitch[] pitches = new Pitch[]{Pitch.A0, Pitch.A1, Pitch.A2, Pitch.A3, Pitch.A4, Pitch.A5, Pitch.A6, Pitch.A7, Pitch.A8,
                                             Pitch.ANeg1, Pitch.ASharp0, Pitch.ASharp1, Pitch.ASharp2, Pitch.ASharp3, Pitch.ASharp4, Pitch.ASharp5,
                                             Pitch.ASharp6, Pitch.ASharp7, Pitch.ASharp8, Pitch.ASharpNeg1, Pitch.B0, Pitch.B1, Pitch.B2, Pitch.B3,
@@ -223,8 +241,8 @@ namespace Kinectophone
                                             Pitch.FSharp0, Pitch.FSharp1, Pitch.FSharp2, Pitch.FSharp3, Pitch.FSharp4, Pitch.FSharp5, Pitch.FSharp6,
                                             Pitch.FSharp7, Pitch.FSharp8, Pitch.FSharp9, Pitch.FSharpNeg1, Pitch.G0, Pitch.G1, Pitch.G2, Pitch.G3, Pitch.G4,
                                             Pitch.G5, Pitch.G6, Pitch.G7, Pitch.G8, Pitch.G9, Pitch.GNeg1, Pitch.GSharp0, Pitch.GSharp1, Pitch.GSharp2,
-                                            Pitch.GSharp3, Pitch.GSharp4, Pitch.GSharp5, Pitch.GSharp6, Pitch.GSharp7, Pitch.GSharp8, Pitch.GSharpNeg1};
-
+                                            Pitch.GSharp3, Pitch.GSharp4, Pitch.GSharp5, Pitch.GSharp6, Pitch.GSharp7, Pitch.GSharp8};
+            
             Dictionary<Tuple<int, int>, Pitch> intToPitch;
 
             if (this.dictType == RegionToPitchDictType.Random)
@@ -305,8 +323,8 @@ namespace Kinectophone
         {
             rect.Stroke = System.Windows.Media.Brushes.Cyan;
             rect.StrokeThickness = 2;
-            rect.Width = 2 * canvas1.Width / this.pitchRegionsX;
-            rect.Height = canvas1.Height / this.pitchRegionsY;
+            rect.Width = 2 * kinectColorOut.Width / this.pitchRegionsX;
+            rect.Height = kinectColorOut.Height / this.pitchRegionsY;
             canvas1.Children.Add(rect);
 
             Canvas.SetTop(rect, rect.Height * xmult);
