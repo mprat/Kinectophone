@@ -280,6 +280,8 @@ namespace Kinectophone
         //only draw the squares for the piano so you know where the notes are
         private void drawPianoSquares()
         {
+            Rectangle c = new Rectangle();
+
         }
 
         private void setPianoParams()
