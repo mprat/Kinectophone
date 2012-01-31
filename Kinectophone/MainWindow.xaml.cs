@@ -86,9 +86,6 @@ namespace Kinectophone
             this.dictType = RegionToPitchDictType.Piano;
             this.regionToPitch = regionToPitchDict();
 
-            canvas1.Height = kinectColorOut.Height;
-            canvas1.Width = kinectColorOut.Width;
-
             switch (this.dictType)
             {
                 case RegionToPitchDictType.Piano:
@@ -121,22 +118,26 @@ namespace Kinectophone
 
             if (skeleton != null && skeleton.TrackingState == SkeletonTrackingState.Tracked)
             {
-                this.head = getAndDrawJoint(skeleton, JointID.Head, headEllipse);
-                this.shoulderCenter = getAndDrawJoint(skeleton, JointID.ShoulderCenter, shoulderCenterEllipse);
-                this.shoulderLeft = getAndDrawJoint(skeleton, JointID.ShoulderLeft, shoulderLeftEllipse);
-                this.shoulderRight = getAndDrawJoint(skeleton, JointID.ShoulderRight, shoulderRightEllipse);
-                this.elbowLeft = getAndDrawJoint(skeleton, JointID.ElbowLeft, elbowLeftEllipse);
-                this.elbowRight = getAndDrawJoint(skeleton, JointID.ElbowRight, elbowRightEllipse);
-                this.wristLeft = getAndDrawJoint(skeleton, JointID.WristLeft, wristLeftEllipse);
-                this.wristRight = getAndDrawJoint(skeleton, JointID.WristRight, wristRightEllipse);
                 this.handLeft = getAndDrawJoint(skeleton, JointID.HandLeft, handLeftEllipse);
                 this.handRight = getAndDrawJoint(skeleton, JointID.HandRight, handRightEllipse);
-                this.spine = getAndDrawJoint(skeleton, JointID.Spine, spineEllipse);
+
+                if (dictType == RegionToPitchDictType.Random)
+                {
+                    this.shoulderCenter = getAndDrawJoint(skeleton, JointID.ShoulderCenter, shoulderCenterEllipse);
+                    this.shoulderLeft = getAndDrawJoint(skeleton, JointID.ShoulderLeft, shoulderLeftEllipse);
+                    this.shoulderRight = getAndDrawJoint(skeleton, JointID.ShoulderRight, shoulderRightEllipse);
+                    this.elbowLeft = getAndDrawJoint(skeleton, JointID.ElbowLeft, elbowLeftEllipse);
+                    this.elbowRight = getAndDrawJoint(skeleton, JointID.ElbowRight, elbowRightEllipse);
+                    this.wristLeft = getAndDrawJoint(skeleton, JointID.WristLeft, wristLeftEllipse);
+                    this.wristRight = getAndDrawJoint(skeleton, JointID.WristRight, wristRightEllipse);
+                    this.spine = getAndDrawJoint(skeleton, JointID.Spine, spineEllipse);
+                    this.head = getAndDrawJoint(skeleton, JointID.Head, headEllipse);
+                }
 
                 switch (dictType)
                 {
                     case RegionToPitchDictType.Random:
-                        
+
                         if (!(this.jointsOnList.Count == 11))
                         {
                             this.jointsOnList.Clear();
@@ -158,7 +159,7 @@ namespace Kinectophone
                         {
                             this.jointsOnList.Clear();
                         }
-                        //this.jointsOnList.Add(this.handLeft);
+                        this.jointsOnList.Add(this.handLeft);
                         this.jointsOnList.Add(this.handRight);
                         break;
                     case RegionToPitchDictType.ModBeats:
@@ -170,23 +171,23 @@ namespace Kinectophone
                     foreach (Joint noteJoint in this.jointsOnList)
                     {
                         //Console.Out.WriteLine(noteJoint.ID.ToString());
-                        
+
                         if (!(bool)multNoteCheck.IsChecked)
                         {
                             this.soundOut.SilenceAllNotes();
                         }
-                        
+
                         double xreg = (double)noteJoint.Position.X;
                         double yreg = (double)noteJoint.Position.Y;
                         Tuple<int, int> pitchreg = coordToRegion(xreg, yreg);
 
-                        Console.Out.WriteLine(pitchreg.ToString());
+                        //Console.Out.WriteLine(pitchreg.ToString());
 
                         if (dictType == RegionToPitchDictType.Piano)
                         {
                             this.soundOut.SendNoteOff(Channel.Channel1, pitchToPlay, soundVelocity);
                         }
-                        
+
                         //only play the sound if the key is contained in the dictionary
                         if (regionToPitch.ContainsKey(pitchreg))
                         {
@@ -199,7 +200,15 @@ namespace Kinectophone
                                 {
                                     this.soundOut.SendNoteOn(Channel.Channel1, pitchToPlay, soundVelocity);
 
-                                    Console.Out.WriteLine(pitchToPlay.ToString());
+                                    //Console.Out.WriteLine(pitchToPlay.ToString());
+                                }
+                            }
+                            else
+                            {
+                                //make sure the pitch is not "zero"
+                                if (!(pitchToPlay.Equals(Pitch.GSharpNeg1)))
+                                {
+                                    this.soundOut.SendControlChange(Channel.Channel1, Midi.Control.SustainPedal, soundVelocity);
                                 }
                             }
 
@@ -214,12 +223,12 @@ namespace Kinectophone
             this.kinectColorOut.Source = e.ImageFrame.ToBitmapSource();
         }
 
-        private Joint getAndDrawJoint(SkeletonData skel, JointID jointID, UIElement ellipse)
+        private Joint getAndDrawJoint(SkeletonData skel, JointID jointID, Ellipse ellipse)
         {
-            Joint jt = skel.Joints[jointID].ScaleTo((int)kinectColorOut.Height, (int)kinectColorOut.Width, .5f, .5f);
+            Joint jt = skel.Joints[jointID].ScaleTo((int)canvas1.Height, (int)(canvas1.Width), .8f, .8f);
 
-            Canvas.SetLeft(ellipse, jt.Position.X);
-            Canvas.SetTop(ellipse, jt.Position.Y);
+            Canvas.SetLeft(ellipse, jt.Position.X + ellipse.Width / 2);
+            Canvas.SetTop(ellipse, jt.Position.Y + ellipse.Height / 2);
 
             ellipse.Visibility = System.Windows.Visibility.Visible;
             return jt;
@@ -245,7 +254,7 @@ namespace Kinectophone
                                             Pitch.FSharp7, Pitch.FSharp8, Pitch.FSharp9, Pitch.FSharpNeg1, Pitch.G0, Pitch.G1, Pitch.G2, Pitch.G3, Pitch.G4,
                                             Pitch.G5, Pitch.G6, Pitch.G7, Pitch.G8, Pitch.G9, Pitch.GNeg1, Pitch.GSharp0, Pitch.GSharp1, Pitch.GSharp2,
                                             Pitch.GSharp3, Pitch.GSharp4, Pitch.GSharp5, Pitch.GSharp6, Pitch.GSharp7, Pitch.GSharp8};
-            
+
             Dictionary<Tuple<int, int>, Pitch> intToPitch;
 
             if (this.dictType == RegionToPitchDictType.Random)
@@ -263,42 +272,42 @@ namespace Kinectophone
             else if (this.dictType == RegionToPitchDictType.Piano)
             {
                 intToPitch = new Dictionary<Tuple<int, int>, Pitch>();
-                
+
                 // TODO: eventually be able to choose what chord/scale you want
                 //setPianoParams();
 
                 //for now, manually set pitches for the piano until can do something better
+                intToPitch.Add(Tuple.Create(1, 2), Pitch.C4);
                 intToPitch.Add(Tuple.Create(2, 2), Pitch.C4);
-                intToPitch.Add(Tuple.Create(3, 2), Pitch.C4);
+                intToPitch.Add(Tuple.Create(3, 2), Pitch.D4);
                 intToPitch.Add(Tuple.Create(4, 2), Pitch.D4);
-                intToPitch.Add(Tuple.Create(5, 2), Pitch.D4);
+                intToPitch.Add(Tuple.Create(5, 2), Pitch.E4);
                 intToPitch.Add(Tuple.Create(6, 2), Pitch.E4);
-                intToPitch.Add(Tuple.Create(7, 2), Pitch.E4);
+                intToPitch.Add(Tuple.Create(7, 2), Pitch.F4);
                 intToPitch.Add(Tuple.Create(8, 2), Pitch.F4);
-                intToPitch.Add(Tuple.Create(9, 2), Pitch.F4);
+                intToPitch.Add(Tuple.Create(9, 2), Pitch.G4);
                 intToPitch.Add(Tuple.Create(10, 2), Pitch.G4);
-                intToPitch.Add(Tuple.Create(11, 2), Pitch.G4);
+                intToPitch.Add(Tuple.Create(11, 2), Pitch.A4);
                 intToPitch.Add(Tuple.Create(12, 2), Pitch.A4);
-                intToPitch.Add(Tuple.Create(13, 2), Pitch.A4);
+                intToPitch.Add(Tuple.Create(13, 2), Pitch.B4);
                 intToPitch.Add(Tuple.Create(14, 2), Pitch.B4);
-                intToPitch.Add(Tuple.Create(15, 2), Pitch.B4);
+                intToPitch.Add(Tuple.Create(2, 1), Pitch.CSharp4);
                 intToPitch.Add(Tuple.Create(3, 1), Pitch.CSharp4);
-                intToPitch.Add(Tuple.Create(4, 1), Pitch.CSharp4);
+                intToPitch.Add(Tuple.Create(4, 1), Pitch.DSharp4);
                 intToPitch.Add(Tuple.Create(5, 1), Pitch.DSharp4);
-                intToPitch.Add(Tuple.Create(6, 1), Pitch.DSharp4);
+                intToPitch.Add(Tuple.Create(8, 1), Pitch.FSharp4);
                 intToPitch.Add(Tuple.Create(9, 1), Pitch.FSharp4);
-                intToPitch.Add(Tuple.Create(10, 1), Pitch.FSharp4);
+                intToPitch.Add(Tuple.Create(10, 1), Pitch.GSharp4);
                 intToPitch.Add(Tuple.Create(11, 1), Pitch.GSharp4);
-                intToPitch.Add(Tuple.Create(12, 1), Pitch.GSharp4);
+                intToPitch.Add(Tuple.Create(12, 1), Pitch.ASharp4);
                 intToPitch.Add(Tuple.Create(13, 1), Pitch.ASharp4);
-                intToPitch.Add(Tuple.Create(14, 1), Pitch.ASharp4);
             }
             else if (this.dictType == RegionToPitchDictType.ModBeats)
             {
                 intToPitch = new Dictionary<Tuple<int, int>, Pitch>();
             }
             else
-                //if nothing else is here. it should never go here.
+            //if nothing else is here. it should never go here.
             {
                 intToPitch = new Dictionary<Tuple<int, int>, Pitch>();
 
@@ -340,7 +349,7 @@ namespace Kinectophone
             //only one octave (the one with the middle C)
             //TODO: options for shifting the octave one higher and one lower
             //you want the two rows to be about the height of your shoulders, which are about rows 2 and 3 out of 5
-            this.pitchRegionsX = 18; 
+            this.pitchRegionsX = 18;
             this.pitchRegionsY = 5;
 
             //for now, manually set the regions to notes unless there is a better way of doing it 
@@ -367,7 +376,7 @@ namespace Kinectophone
                 workingCoord += partHeight;
             }
             int yTuple = (int)(workingCoord / partHeight);
-            
+
             Tuple<int, int> region = Tuple.Create(xTuple, yTuple);
             return region;
         }
