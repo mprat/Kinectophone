@@ -25,6 +25,10 @@ using Midi;
 //using NAudio.Utils;
 //using NAudio.Wave;
 
+
+//TODO: make sure canvas1 and kinectColorOut have the same dimensions
+
+
 namespace Kinectophone
 {
     /// <summary>
@@ -105,7 +109,15 @@ namespace Kinectophone
                         {
                             this.soundOut.SilenceAllNotes();
                         }
-                        this.soundOut.SendNoteOn(Channel.Channel1, regionToPitch[coordToRegion((double)noteJoint.Position.X, (double)noteJoint.Position.Y)], soundVelocity);
+
+                        double xreg = (double)noteJoint.Position.X;
+                        double yreg = (double)noteJoint.Position.Y;
+                        Tuple<int, int> pitchreg = coordToRegion(xreg, yreg);
+
+                        if (pitchreg.Item1 < pitchRegionsX && pitchreg.Item2 < pitchRegionsY)
+                        {
+                            this.soundOut.SendNoteOn(Channel.Channel1, regionToPitch[coordToRegion(xreg, yreg)], soundVelocity);
+                        }
                     }
                 }
             }
@@ -118,7 +130,7 @@ namespace Kinectophone
 
         private Joint getAndDrawJoint(SkeletonData skel, JointID jointID, UIElement ellipse)
         {
-            Joint jt = skel.Joints[jointID].ScaleTo((int)canvas1.Height, (int)canvas1.Width, .5f, .5f);
+            Joint jt = skel.Joints[jointID].ScaleTo((int)kinectColorOut.Height, (int)kinectColorOut.Width, .5f, .5f);
 
             Canvas.SetLeft(ellipse, jt.Position.X);
             Canvas.SetTop(ellipse, jt.Position.Y);
@@ -175,19 +187,8 @@ namespace Kinectophone
             return intToPitch;
         }
 
-        private void drawGridBoundaries()
+        private void drawNoteSquares()
         {
-            double partWidth = canvas1.Width / this.pitchRegionsX;
-            double partHeight = canvas1.Height / this.pitchRegionsY;
-
-            double workingCoord = 0;
-
-            for (int i = 0; i < this.pitchRegionsX; i++)
-            {
-                Line templine = new Line();
-
-                canvas1.Children.Add(templine);
-            }
         }
 
         private Tuple<int, int> coordToRegion(double x, double y)
@@ -195,7 +196,7 @@ namespace Kinectophone
             double workingCoord = 0;
 
             //break x
-            double partWidth = canvas1.Width / this.pitchRegionsX;
+            double partWidth = kinectColorOut.Width / this.pitchRegionsX;
             while (Math.Abs(x - workingCoord) > partWidth)
             {
                 workingCoord += partWidth;
@@ -203,7 +204,7 @@ namespace Kinectophone
             int xTuple = (int)(workingCoord / partWidth);
             workingCoord = 0;
             //break y
-            double partHeight = canvas1.Height / this.pitchRegionsY;
+            double partHeight = kinectColorOut.Height / this.pitchRegionsY;
             while (Math.Abs(y - workingCoord) > partHeight)
             {
                 workingCoord += partHeight;
