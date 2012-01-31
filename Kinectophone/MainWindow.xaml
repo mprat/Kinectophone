@@ -4,6 +4,7 @@
         Title="MainWindow" Height="800" Width="1200" Loaded="Window_Loaded">
     <Grid Name="kinectGrid" Height="774" Width="1171">
         <Canvas Height="720" HorizontalAlignment="Left" Margin="34,25,0,0" Name="canvas1" VerticalAlignment="Top" Width="816">
+        <Image Height="720" HorizontalAlignment="Left" Margin="34,0,0,0" Name="kinectColorOut" Stretch="Fill" VerticalAlignment="Top" Width="816" />
             <Ellipse Visibility="Hidden" Canvas.Left="6" Canvas.Top="6" Height="20" Name="headEllipse" Stroke="AliceBlue" Width="20" Fill="AliceBlue"/>
             <Ellipse Visibility="Hidden" Canvas.Left="6" Canvas.Top="6" Height="20" Name="shoulderCenterEllipse" Stroke="Aqua" Width="20" Fill="Aqua"/>
             <Ellipse Visibility="Hidden" Canvas.Left="6" Canvas.Top="6" Height="20" Name="shoulderLeftEllipse" Stroke="Aquamarine" Width="20" Fill="Aquamarine"/>
@@ -15,7 +16,7 @@
             <Ellipse Visibility="Hidden" Canvas.Left="6" Canvas.Top="6" Height="20" Name="handLeftEllipse" Stroke="Orchid" Width="20" Fill="Orchid"/>
             <Ellipse Visibility="Hidden" Canvas.Left="6" Canvas.Top="6" Height="20" Name="handRightEllipse" Stroke="PaleGreen" Width="20" Fill="PaleGreen"/>
             <Ellipse Visibility="Hidden" Canvas.Left="6" Canvas.Top="6" Height="20" Name="spineEllipse" Stroke="PaleTurquoise" Width="20" Fill="PaleTurquoise"/>
-            <Image Height="720" Name="kinectColorOut" Stretch="Fill" Width="816" Canvas.Left="0" Canvas.Top="13" />
+           
         </Canvas>
         <Button Content="Toggle Sound" Height="50" HorizontalAlignment="Left" Margin="894,42,0,0" Name="toggleSound" VerticalAlignment="Top" Width="208" Click="toggleSound_Click" />
         <CheckBox Content="Multiple notes" Height="16" HorizontalAlignment="Left" Margin="945,109,0,0" Name="multNoteCheck" VerticalAlignment="Top" IsChecked="True"/>
@@ -24,5 +25,5 @@
             <ComboBoxItem Content="Piano"/>
             <ComboBoxItem Content="Mod" />
         </ComboBox>
-    </Grid>
+ </Grid>
 </Window>

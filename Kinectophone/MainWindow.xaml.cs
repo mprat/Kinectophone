@@ -295,6 +295,7 @@ namespace Kinectophone
 
             //for now, manually set the regions to notes unless there is a better way of doing it 
             //(notes are manually set in regionToPitchDict)
+
         }
 
         private Tuple<int, int> coordToRegion(double x, double y)
