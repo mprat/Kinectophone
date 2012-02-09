@@ -46,6 +46,7 @@ namespace Kinectophone
         private Random random = new Random();
         private Dictionary<Tuple<int, int>, Pitch> regionToPitch = new Dictionary<Tuple<int, int>, Pitch>();
         private HashSet<Joint> jointsOnList = new HashSet<Joint>();
+        private int soundVelocity = 120;
 
         private Joint head = new Joint();
         private Joint shoulderCenter = new Joint();
@@ -60,6 +61,9 @@ namespace Kinectophone
         private Joint spine = new Joint();
 
         private Pitch pitchToPlay = Pitch.GSharpNeg1; //this is the "zero" of our pitches
+
+        private Clock pianoUp = new Clock(120); //TODO: figure out a better way to set BPM;
+        private Clock pianoDown = new Clock(120); //TODO: figure out a better way to set BPM
 
         enum RegionToPitchDictType { Random, Piano, ModBeats, GestureMusic };
 
@@ -85,7 +89,7 @@ namespace Kinectophone
 
             this.dictType = RegionToPitchDictType.GestureMusic;
             this.regionToPitch = regionToPitchDict();
-
+                        
             switch (this.dictType)
             {
                 case RegionToPitchDictType.Piano:
@@ -110,8 +114,6 @@ namespace Kinectophone
 
         void nui_SkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
         {
-            int soundVelocity = 120;
-
             SkeletonData skeleton = (from s in e.SkeletonFrame.Skeletons
                                      where s.TrackingState == SkeletonTrackingState.Tracked
                                      select s).FirstOrDefault();
@@ -120,6 +122,8 @@ namespace Kinectophone
             {
                 this.handRight = getAndDrawJoint(skeleton, JointID.HandRight, handRightEllipse);
                 this.handLeft = getAndDrawJoint(skeleton, JointID.HandLeft, handLeftEllipse);
+                this.spine = getAndDrawJoint(skeleton, JointID.Spine, spineEllipse);
+                this.head = getAndDrawJoint(skeleton, JointID.Head, headEllipse);
 
                 if (dictType == RegionToPitchDictType.Random)
                 {
@@ -130,8 +134,6 @@ namespace Kinectophone
                     this.elbowRight = getAndDrawJoint(skeleton, JointID.ElbowRight, elbowRightEllipse);
                     this.wristLeft = getAndDrawJoint(skeleton, JointID.WristLeft, wristLeftEllipse);
                     this.wristRight = getAndDrawJoint(skeleton, JointID.WristRight, wristRightEllipse);
-                    this.spine = getAndDrawJoint(skeleton, JointID.Spine, spineEllipse);
-                    this.head = getAndDrawJoint(skeleton, JointID.Head, headEllipse);
                 }
 
                 switch (dictType)
@@ -165,12 +167,14 @@ namespace Kinectophone
                     case RegionToPitchDictType.ModBeats:
                         break;
                     case RegionToPitchDictType.GestureMusic:
-                        if (!(this.jointsOnList.Count == 2))
+                        if (!(this.jointsOnList.Count == 4))
                         {
                             this.jointsOnList.Clear();
                         }
                         this.jointsOnList.Add(this.handRight);
                         this.jointsOnList.Add(this.handLeft);
+                        this.jointsOnList.Add(this.spine);
+                        this.jointsOnList.Add(this.head);
                         break;
                 }
 
@@ -181,8 +185,67 @@ namespace Kinectophone
                     {
                         //TODO: do real gestures. for now do a hacky version of gestures
 
-                        if ()
+                        Microsoft.Research.Kinect.Nui.Vector rightHandPos = this.handRight.Position;
+                        Microsoft.Research.Kinect.Nui.Vector leftHandPos = this.handLeft.Position;
+                        Microsoft.Research.Kinect.Nui.Vector spinePos = this.spine.Position;
+                        Microsoft.Research.Kinect.Nui.Vector headPos = this.head.Position;
+
+                        
+                        //if the hands are close together above the spine
+                        if ((distance(rightHandPos, leftHandPos) < 50.0) && (rightHandPos.Y < spinePos.Y))
                         {
+                            //to the right of the spine
+                            if (rightHandPos.X > kinectColorOut.Width / 2)
+                            {
+                                if (!(this.pianoUp.IsRunning))
+                                {
+                                    this.pianoUp.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.C4, this.soundVelocity, 0, pianoUp, .5F));
+                                    this.pianoUp.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.D4, this.soundVelocity, .5F, pianoUp, .5F));
+                                    this.pianoUp.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.E4, this.soundVelocity, 1, pianoUp, .5F));
+                                    this.pianoUp.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.F4, this.soundVelocity, 1.5F, pianoUp, .5F));
+                                    this.pianoUp.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.G4, this.soundVelocity, 2, pianoUp, .5F));
+                                    this.pianoUp.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.A4, this.soundVelocity, 2.5F, pianoUp, .5F));
+                                    this.pianoUp.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.B4, this.soundVelocity, 3, pianoUp, .5F));
+                                    this.pianoUp.Start();
+                                }
+                            }
+                                //to the left of the spine
+                            else
+                            {
+                                if (!(this.pianoDown.IsRunning))
+                                {
+                                    this.pianoDown.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.B4, this.soundVelocity, 0, pianoDown, .25F));
+                                    this.pianoDown.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.A4, this.soundVelocity, .25F, pianoDown, .25F));
+                                    this.pianoDown.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.G4, this.soundVelocity, .5F, pianoDown, .25F));
+                                    this.pianoDown.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.F4, this.soundVelocity, .75F, pianoDown, .25F));
+                                    this.pianoDown.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.E4, this.soundVelocity, 1, pianoDown, .25F));
+                                    this.pianoDown.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.D4, this.soundVelocity, 1.25F, pianoDown, .25F));
+                                    this.pianoDown.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.C4, this.soundVelocity, 1.5F, pianoDown, .25F));
+                                    this.pianoDown.Start();
+                                }
+                            }
+                        }
+                            //raise both hands above the head when one is on one side and one is on the other
+                        else if ((rightHandPos.X > kinectColorOut.Width/2) && (leftHandPos.X < kinectColorOut.Width/2) 
+                            && (rightHandPos.Y < headPos.Y) && (leftHandPos.Y < headPos.Y) && (distance(rightHandPos, leftHandPos) > 50.0))
+                        {
+                            this.soundOut.SendPercussion(Percussion.CrashCymbal1, this.soundVelocity);
+                            this.soundOut.SendPercussion(Percussion.CrashCymbal2, this.soundVelocity);
+                        }
+                        else
+                        {
+                            if (this.pianoUp.IsRunning)
+                            {
+                                this.pianoUp.Stop();
+                            }
+                            this.pianoUp.Reset();
+
+                            if (this.pianoDown.IsRunning)
+                            {
+                                this.pianoDown.Stop();
+                            }
+                            this.pianoDown.Reset();
+
                         }
                     }
 
@@ -203,7 +266,7 @@ namespace Kinectophone
 
                         if (dictType == RegionToPitchDictType.Piano)
                         {
-                            this.soundOut.SendNoteOff(Channel.Channel1, pitchToPlay, soundVelocity);
+                            this.soundOut.SendNoteOff(Channel.Channel1, pitchToPlay, this.soundVelocity);
                         }
 
                         //only play the sound if the key is contained in the dictionary
@@ -216,7 +279,7 @@ namespace Kinectophone
                                 //make sure the pitch is not "zero"
                                 if (!(pitchToPlay.Equals(Pitch.GSharpNeg1)))
                                 {
-                                    this.soundOut.SendNoteOn(Channel.Channel1, pitchToPlay, soundVelocity);
+                                    this.soundOut.SendNoteOn(Channel.Channel1, pitchToPlay, this.soundVelocity);
 
                                     //Console.Out.WriteLine(pitchToPlay.ToString());
                                 }
@@ -226,7 +289,7 @@ namespace Kinectophone
                                 //make sure the pitch is not "zero"
                                 if (!(pitchToPlay.Equals(Pitch.GSharpNeg1)))
                                 {
-                                    this.soundOut.SendControlChange(Channel.Channel1, Midi.Control.SustainPedal, soundVelocity);
+                                    this.soundOut.SendControlChange(Channel.Channel1, Midi.Control.SustainPedal, this.soundVelocity);
                                 }
                             }
 
@@ -250,6 +313,12 @@ namespace Kinectophone
 
             ellipse.Visibility = System.Windows.Visibility.Visible;
             return jt;
+        }
+        
+        //distance between two skeletal points
+        private double distance(Microsoft.Research.Kinect.Nui.Vector v1, Microsoft.Research.Kinect.Nui.Vector v2)
+        {
+            return (Math.Sqrt(Math.Pow(v1.W - v2.W, 2) + Math.Pow(v1.X - v2.X, 2) + Math.Pow(v1.Y - v2.Y, 2) + Math.Pow(v1.Y - v2.Y, 2)));
         }
 
         //this method is called once at the beginning of execution of this program
