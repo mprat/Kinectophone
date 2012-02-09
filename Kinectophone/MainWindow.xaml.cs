@@ -61,7 +61,7 @@ namespace Kinectophone
 
         private Pitch pitchToPlay = Pitch.GSharpNeg1; //this is the "zero" of our pitches
 
-        enum RegionToPitchDictType { Random, Piano, ModBeats };
+        enum RegionToPitchDictType { Random, Piano, ModBeats, GestureMusic };
 
         //music setting booleans (defaults)
         private RegionToPitchDictType dictType;
@@ -83,7 +83,7 @@ namespace Kinectophone
 
             this.nui.SkeletonFrameReady += new EventHandler<SkeletonFrameReadyEventArgs>(nui_SkeletonFrameReady);
 
-            this.dictType = RegionToPitchDictType.Piano;
+            this.dictType = RegionToPitchDictType.GestureMusic;
             this.regionToPitch = regionToPitchDict();
 
             switch (this.dictType)
@@ -118,11 +118,11 @@ namespace Kinectophone
 
             if (skeleton != null && skeleton.TrackingState == SkeletonTrackingState.Tracked)
             {
-                this.handLeft = getAndDrawJoint(skeleton, JointID.HandLeft, handLeftEllipse);
                 this.handRight = getAndDrawJoint(skeleton, JointID.HandRight, handRightEllipse);
 
                 if (dictType == RegionToPitchDictType.Random)
                 {
+                    this.handLeft = getAndDrawJoint(skeleton, JointID.HandLeft, handLeftEllipse);
                     this.shoulderCenter = getAndDrawJoint(skeleton, JointID.ShoulderCenter, shoulderCenterEllipse);
                     this.shoulderLeft = getAndDrawJoint(skeleton, JointID.ShoulderLeft, shoulderLeftEllipse);
                     this.shoulderRight = getAndDrawJoint(skeleton, JointID.ShoulderRight, shoulderRightEllipse);
@@ -164,6 +164,13 @@ namespace Kinectophone
                         break;
                     case RegionToPitchDictType.ModBeats:
                         break;
+                    case RegionToPitchDictType.GestureMusic:
+                        if (!(this.jointsOnList.Count == 1))
+                        {
+                            this.jointsOnList.Clear();
+                        }
+                        this.jointsOnList.Add(this.handRight);
+                        break;
                 }
 
                 if (this.soundOut.IsOpen)
@@ -180,6 +187,12 @@ namespace Kinectophone
                         double xreg = (double)noteJoint.Position.X;
                         double yreg = (double)noteJoint.Position.Y;
                         Tuple<int, int> pitchreg = coordToRegion(xreg, yreg);
+
+                        if (dictType == RegionToPitchDictType.GestureMusic)
+                        {
+                            //TODO: do real gestures. for now do a hacky version of gestures
+
+                        }
 
                         //Console.Out.WriteLine(pitchreg.ToString());
 
@@ -305,6 +318,12 @@ namespace Kinectophone
             else if (this.dictType == RegionToPitchDictType.ModBeats)
             {
                 intToPitch = new Dictionary<Tuple<int, int>, Pitch>();
+            }
+            else if (this.dictType == RegionToPitchDictType.GestureMusic)
+            {
+                intToPitch = new Dictionary<Tuple<int, int>, Pitch>();
+                
+                //TODO: shouldn't need an intToPitch dictionary here
             }
             else
             //if nothing else is here. it should never go here.
