@@ -59,6 +59,8 @@ namespace Kinectophone
         private Joint handLeft = new Joint();
         private Joint handRight = new Joint();
         private Joint spine = new Joint();
+        private Joint hipLeft = new Joint();
+        private Joint hipRight = new Joint();
 
         private Pitch pitchToPlay = Pitch.GSharpNeg1; //this is the "zero" of our pitches
 
@@ -124,6 +126,8 @@ namespace Kinectophone
                 this.handLeft = getAndDrawJoint(skeleton, JointID.HandLeft, handLeftEllipse);
                 this.spine = getAndDrawJoint(skeleton, JointID.Spine, spineEllipse);
                 this.head = getAndDrawJoint(skeleton, JointID.Head, headEllipse);
+                this.hipLeft = getAndDrawJoint(skeleton, JointID.HipLeft, hipLeftEllipse);
+                this.hipRight = getAndDrawJoint(skeleton, JointID.HipRight, hipRightEllipse);
 
                 if (dictType == RegionToPitchDictType.Random)
                 {
@@ -167,7 +171,7 @@ namespace Kinectophone
                     case RegionToPitchDictType.ModBeats:
                         break;
                     case RegionToPitchDictType.GestureMusic:
-                        if (!(this.jointsOnList.Count == 4))
+                        if (!(this.jointsOnList.Count == 6))
                         {
                             this.jointsOnList.Clear();
                         }
@@ -175,6 +179,8 @@ namespace Kinectophone
                         this.jointsOnList.Add(this.handLeft);
                         this.jointsOnList.Add(this.spine);
                         this.jointsOnList.Add(this.head);
+                        this.jointsOnList.Add(this.hipRight);
+                        this.jointsOnList.Add(this.hipLeft);
                         break;
                 }
 
@@ -189,6 +195,8 @@ namespace Kinectophone
                         Microsoft.Research.Kinect.Nui.Vector leftHandPos = this.handLeft.Position;
                         Microsoft.Research.Kinect.Nui.Vector spinePos = this.spine.Position;
                         Microsoft.Research.Kinect.Nui.Vector headPos = this.head.Position;
+                        Microsoft.Research.Kinect.Nui.Vector hipLeftPos = this.hipLeft.Position;
+                        Microsoft.Research.Kinect.Nui.Vector hipRightPos = this.hipRight.Position;
 
                         
                         //if the hands are close together above the spine
@@ -231,6 +239,17 @@ namespace Kinectophone
                         {
                             this.soundOut.SendPercussion(Percussion.CrashCymbal1, this.soundVelocity);
                             this.soundOut.SendPercussion(Percussion.CrashCymbal2, this.soundVelocity);
+                        }
+                            //both hands on hips is a cowbell
+                        else if ((distance(hipLeftPos, leftHandPos) < 150.0) && (distance(hipRightPos, rightHandPos) < 150.0))
+                        {
+                            this.soundOut.SendPercussion(Percussion.Cowbell, this.soundVelocity);
+                        }
+                            //right hand on hip is a bass drum
+                        else if (distance(hipRightPos, rightHandPos) < 50.0)
+                        {
+                            this.soundOut.SendPercussion(Percussion.BassDrum1, this.soundVelocity);
+                            this.soundOut.SendPercussion(Percussion.BassDrum2, this.soundVelocity);
                         }
                         else
                         {

@@ -18,6 +18,8 @@
             <Ellipse Visibility="Hidden" Canvas.Left="6" Canvas.Top="6" Height="20" Name="handLeftEllipse" Stroke="Orchid" Width="20" Fill="Orchid"/>
             <Ellipse Visibility="Hidden" Canvas.Left="6" Canvas.Top="6" Height="20" Name="handRightEllipse" Stroke="PaleGreen" Width="20" Fill="PaleGreen"/>
             <Ellipse Visibility="Hidden" Canvas.Left="6" Canvas.Top="6" Height="20" Name="spineEllipse" Stroke="PaleTurquoise" Width="20" Fill="PaleTurquoise"/>
+            <Ellipse Visibility="Hidden" Canvas.Left="6" Canvas.Top="6" Height="20" Name="hipLeftEllipse" Stroke="PapayaWhip" Width="20" Fill="PaleTurquoise"/>
+            <Ellipse Visibility="Hidden" Canvas.Left="6" Canvas.Top="6" Height="20" Name="hipRightEllipse" Stroke="PaleVioletRed" Width="20" Fill="PaleTurquoise"/>
 
         </Canvas>
         <Button Content="Toggle Sound" Height="50" HorizontalAlignment="Left" Margin="894,42,0,0" Name="toggleSound" VerticalAlignment="Top" Width="208" Click="toggleSound_Click" />
