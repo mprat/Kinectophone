@@ -119,10 +119,10 @@ namespace Kinectophone
             if (skeleton != null && skeleton.TrackingState == SkeletonTrackingState.Tracked)
             {
                 this.handRight = getAndDrawJoint(skeleton, JointID.HandRight, handRightEllipse);
+                this.handLeft = getAndDrawJoint(skeleton, JointID.HandLeft, handLeftEllipse);
 
                 if (dictType == RegionToPitchDictType.Random)
                 {
-                    this.handLeft = getAndDrawJoint(skeleton, JointID.HandLeft, handLeftEllipse);
                     this.shoulderCenter = getAndDrawJoint(skeleton, JointID.ShoulderCenter, shoulderCenterEllipse);
                     this.shoulderLeft = getAndDrawJoint(skeleton, JointID.ShoulderLeft, shoulderLeftEllipse);
                     this.shoulderRight = getAndDrawJoint(skeleton, JointID.ShoulderRight, shoulderRightEllipse);
@@ -165,16 +165,27 @@ namespace Kinectophone
                     case RegionToPitchDictType.ModBeats:
                         break;
                     case RegionToPitchDictType.GestureMusic:
-                        if (!(this.jointsOnList.Count == 1))
+                        if (!(this.jointsOnList.Count == 2))
                         {
                             this.jointsOnList.Clear();
                         }
                         this.jointsOnList.Add(this.handRight);
+                        this.jointsOnList.Add(this.handLeft);
                         break;
                 }
 
                 if (this.soundOut.IsOpen)
                 {
+                    //only for GestureMusic
+                    if (dictType == RegionToPitchDictType.GestureMusic)
+                    {
+                        //TODO: do real gestures. for now do a hacky version of gestures
+
+                        if ()
+                        {
+                        }
+                    }
+
                     foreach (Joint noteJoint in this.jointsOnList)
                     {
                         //Console.Out.WriteLine(noteJoint.ID.ToString());
@@ -187,12 +198,6 @@ namespace Kinectophone
                         double xreg = (double)noteJoint.Position.X;
                         double yreg = (double)noteJoint.Position.Y;
                         Tuple<int, int> pitchreg = coordToRegion(xreg, yreg);
-
-                        if (dictType == RegionToPitchDictType.GestureMusic)
-                        {
-                            //TODO: do real gestures. for now do a hacky version of gestures
-
-                        }
 
                         //Console.Out.WriteLine(pitchreg.ToString());
 
