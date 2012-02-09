@@ -128,10 +128,10 @@ namespace Kinectophone
                 this.head = getAndDrawJoint(skeleton, JointID.Head, headEllipse);
                 this.hipLeft = getAndDrawJoint(skeleton, JointID.HipLeft, hipLeftEllipse);
                 this.hipRight = getAndDrawJoint(skeleton, JointID.HipRight, hipRightEllipse);
+                this.shoulderCenter = getAndDrawJoint(skeleton, JointID.ShoulderCenter, shoulderCenterEllipse);
 
                 if (dictType == RegionToPitchDictType.Random)
                 {
-                    this.shoulderCenter = getAndDrawJoint(skeleton, JointID.ShoulderCenter, shoulderCenterEllipse);
                     this.shoulderLeft = getAndDrawJoint(skeleton, JointID.ShoulderLeft, shoulderLeftEllipse);
                     this.shoulderRight = getAndDrawJoint(skeleton, JointID.ShoulderRight, shoulderRightEllipse);
                     this.elbowLeft = getAndDrawJoint(skeleton, JointID.ElbowLeft, elbowLeftEllipse);
@@ -171,7 +171,7 @@ namespace Kinectophone
                     case RegionToPitchDictType.ModBeats:
                         break;
                     case RegionToPitchDictType.GestureMusic:
-                        if (!(this.jointsOnList.Count == 6))
+                        if (!(this.jointsOnList.Count == 7))
                         {
                             this.jointsOnList.Clear();
                         }
@@ -181,6 +181,7 @@ namespace Kinectophone
                         this.jointsOnList.Add(this.head);
                         this.jointsOnList.Add(this.hipRight);
                         this.jointsOnList.Add(this.hipLeft);
+                        this.jointsOnList.Add(this.shoulderCenter);
                         break;
                 }
 
@@ -197,6 +198,7 @@ namespace Kinectophone
                         Microsoft.Research.Kinect.Nui.Vector headPos = this.head.Position;
                         Microsoft.Research.Kinect.Nui.Vector hipLeftPos = this.hipLeft.Position;
                         Microsoft.Research.Kinect.Nui.Vector hipRightPos = this.hipRight.Position;
+                        Microsoft.Research.Kinect.Nui.Vector shoulderCenterPos = this.shoulderCenter.Position;
 
                         
                         //if the hands are close together above the spine
@@ -235,13 +237,13 @@ namespace Kinectophone
                         }
                         //raise both hands above the head when one is on one side and one is on the other
                         else if ((rightHandPos.X > kinectColorOut.Width / 2) && (leftHandPos.X < kinectColorOut.Width / 2)
-                            && (rightHandPos.Y < headPos.Y) && (leftHandPos.Y < headPos.Y) && (distance(rightHandPos, leftHandPos) > 50.0))
+                            && (rightHandPos.Y < shoulderCenterPos.Y) && (leftHandPos.Y < shoulderCenterPos.Y) && (distance(rightHandPos, leftHandPos) > 50.0))
                         {
                             this.soundOut.SendPercussion(Percussion.CrashCymbal1, this.soundVelocity);
                             this.soundOut.SendPercussion(Percussion.CrashCymbal2, this.soundVelocity);
                         }
                             //raise right hand and play a really high note
-                        else if ((distance(headPos, rightHandPos) > 200.0) && (rightHandPos.X > kinectColorOut.Width / 2)
+                        else if ((distance(headPos, rightHandPos) > 150.0) && (rightHandPos.X > kinectColorOut.Width / 2)
                             && (rightHandPos.Y < headPos.Y))
                         {
                             this.soundOut.SendNoteOn(Channel.Channel1, Pitch.A6, this.soundVelocity);
