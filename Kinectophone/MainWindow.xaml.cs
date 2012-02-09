@@ -217,7 +217,7 @@ namespace Kinectophone
                                     this.pianoUp.Start();
                                 }
                             }
-                                //to the left of the spine
+                            //to the left of the spine
                             else
                             {
                                 if (!(this.pianoDown.IsRunning))
@@ -233,19 +233,25 @@ namespace Kinectophone
                                 }
                             }
                         }
-                            //raise both hands above the head when one is on one side and one is on the other
-                        else if ((rightHandPos.X > kinectColorOut.Width/2) && (leftHandPos.X < kinectColorOut.Width/2) 
+                        //raise both hands above the head when one is on one side and one is on the other
+                        else if ((rightHandPos.X > kinectColorOut.Width / 2) && (leftHandPos.X < kinectColorOut.Width / 2)
                             && (rightHandPos.Y < headPos.Y) && (leftHandPos.Y < headPos.Y) && (distance(rightHandPos, leftHandPos) > 50.0))
                         {
                             this.soundOut.SendPercussion(Percussion.CrashCymbal1, this.soundVelocity);
                             this.soundOut.SendPercussion(Percussion.CrashCymbal2, this.soundVelocity);
                         }
-                            //both hands on hips is a cowbell
+                            //raise right hand and play a really high note
+                        else if ((distance(headPos, rightHandPos) > 200.0) && (rightHandPos.X > kinectColorOut.Width / 2)
+                            && (rightHandPos.Y < headPos.Y))
+                        {
+                            this.soundOut.SendNoteOn(Channel.Channel1, Pitch.A6, this.soundVelocity);
+                        }
+                        //both hands on hips is a cowbell
                         else if ((distance(hipLeftPos, leftHandPos) < 150.0) && (distance(hipRightPos, rightHandPos) < 150.0))
                         {
                             this.soundOut.SendPercussion(Percussion.Cowbell, this.soundVelocity);
                         }
-                            //right hand on hip is a bass drum
+                        //right hand on hip is a bass drum
                         else if (distance(hipRightPos, rightHandPos) < 50.0)
                         {
                             this.soundOut.SendPercussion(Percussion.BassDrum1, this.soundVelocity);
