@@ -61,11 +61,14 @@ namespace Kinectophone
         private Joint spine = new Joint();
         private Joint hipLeft = new Joint();
         private Joint hipRight = new Joint();
+        private Joint kneeRight = new Joint();
+        private Joint kneeLeft = new Joint();
 
         private Pitch pitchToPlay = Pitch.GSharpNeg1; //this is the "zero" of our pitches
 
         private Clock pianoUp = new Clock(120); //TODO: figure out a better way to set BPM;
         private Clock pianoDown = new Clock(120); //TODO: figure out a better way to set BPM
+        private Clock beat1 = new Clock(120);
 
         enum RegionToPitchDictType { Random, Piano, ModBeats, GestureMusic };
 
@@ -91,7 +94,9 @@ namespace Kinectophone
 
             this.dictType = RegionToPitchDictType.GestureMusic;
             this.regionToPitch = regionToPitchDict();
-                        
+
+            //this.beat1.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel10, (Pitch)(Percussion.BassDrum1), this.soundVelocity, 0.5F, this.beat1, 12.5F));
+            
             switch (this.dictType)
             {
                 case RegionToPitchDictType.Piano:
@@ -109,9 +114,21 @@ namespace Kinectophone
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            this.nui.Uninitialize();
+            if (this.beat1.IsRunning)
+            {
+                this.beat1.Stop();
+            }
+            if (this.pianoDown.IsRunning)
+            {
+                this.pianoDown.Stop();
+            }
+            if (this.pianoUp.IsRunning)
+            {
+                this.pianoUp.Stop();
+            }
             this.soundOut.SilenceAllNotes();
             this.soundOut.Close();
+            this.nui.Uninitialize();
         }
 
         void nui_SkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
@@ -129,6 +146,8 @@ namespace Kinectophone
                 this.hipLeft = getAndDrawJoint(skeleton, JointID.HipLeft, hipLeftEllipse);
                 this.hipRight = getAndDrawJoint(skeleton, JointID.HipRight, hipRightEllipse);
                 this.shoulderCenter = getAndDrawJoint(skeleton, JointID.ShoulderCenter, shoulderCenterEllipse);
+                this.kneeLeft = getAndDrawJoint(skeleton, JointID.KneeLeft, kneeLeftEllipse);
+                this.kneeRight = getAndDrawJoint(skeleton, JointID.KneeRight, kneeRightEllipse);
 
                 if (dictType == RegionToPitchDictType.Random)
                 {
@@ -182,6 +201,8 @@ namespace Kinectophone
                         this.jointsOnList.Add(this.hipRight);
                         this.jointsOnList.Add(this.hipLeft);
                         this.jointsOnList.Add(this.shoulderCenter);
+                        this.jointsOnList.Add(this.kneeLeft);
+                        this.jointsOnList.Add(this.kneeRight);
                         break;
                 }
 
@@ -199,41 +220,45 @@ namespace Kinectophone
                         Microsoft.Research.Kinect.Nui.Vector hipLeftPos = this.hipLeft.Position;
                         Microsoft.Research.Kinect.Nui.Vector hipRightPos = this.hipRight.Position;
                         Microsoft.Research.Kinect.Nui.Vector shoulderCenterPos = this.shoulderCenter.Position;
-
+                        Microsoft.Research.Kinect.Nui.Vector kneeLeftPos = this.kneeLeft.Position;
+                        Microsoft.Research.Kinect.Nui.Vector kneeRightPos = this.kneeRight.Position;
                         
                         //if the hands are close together above the spine
-                        if ((distance(rightHandPos, leftHandPos) < 50.0) && (rightHandPos.Y < spinePos.Y))
+                        if (distance(rightHandPos, leftHandPos) < 50.0)
                         {
-                            //to the right of the spine
-                            if (rightHandPos.X > kinectColorOut.Width / 2)
+                            if (rightHandPos.Y < spinePos.Y)
                             {
-                                if (!(this.pianoUp.IsRunning))
+                                //to the right of the spine
+                                if (rightHandPos.X > spinePos.X)
                                 {
-                                    this.pianoUp.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.C4, this.soundVelocity, 0, pianoUp, .5F));
-                                    this.pianoUp.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.D4, this.soundVelocity, .5F, pianoUp, .5F));
-                                    this.pianoUp.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.E4, this.soundVelocity, 1, pianoUp, .5F));
-                                    this.pianoUp.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.F4, this.soundVelocity, 1.5F, pianoUp, .5F));
-                                    this.pianoUp.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.G4, this.soundVelocity, 2, pianoUp, .5F));
-                                    this.pianoUp.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.A4, this.soundVelocity, 2.5F, pianoUp, .5F));
-                                    this.pianoUp.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.B4, this.soundVelocity, 3, pianoUp, .5F));
-                                    this.pianoUp.Start();
+                                    if (!(this.pianoUp.IsRunning))
+                                    {
+                                        this.pianoUp.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.C4, this.soundVelocity, 0, pianoUp, .5F));
+                                        this.pianoUp.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.D4, this.soundVelocity, .5F, pianoUp, .5F));
+                                        this.pianoUp.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.E4, this.soundVelocity, 1, pianoUp, .5F));
+                                        this.pianoUp.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.F4, this.soundVelocity, 1.5F, pianoUp, .5F));
+                                        this.pianoUp.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.G4, this.soundVelocity, 2, pianoUp, .5F));
+                                        this.pianoUp.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.A4, this.soundVelocity, 2.5F, pianoUp, .5F));
+                                        this.pianoUp.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.B4, this.soundVelocity, 3, pianoUp, .5F));
+                                        this.pianoUp.Start();
+                                    }
                                 }
-                            }
-                            //to the left of the spine
-                            else
-                            {
-                                if (!(this.pianoDown.IsRunning))
+                                //to the left of the spine
+                                else
                                 {
-                                    this.pianoDown.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.B4, this.soundVelocity, 0, pianoDown, .25F));
-                                    this.pianoDown.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.A4, this.soundVelocity, .25F, pianoDown, .25F));
-                                    this.pianoDown.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.G4, this.soundVelocity, .5F, pianoDown, .25F));
-                                    this.pianoDown.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.F4, this.soundVelocity, .75F, pianoDown, .25F));
-                                    this.pianoDown.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.E4, this.soundVelocity, 1, pianoDown, .25F));
-                                    this.pianoDown.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.D4, this.soundVelocity, 1.25F, pianoDown, .25F));
-                                    this.pianoDown.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.C4, this.soundVelocity, 1.5F, pianoDown, .25F));
-                                    this.pianoDown.Start();
+                                    if (!(this.pianoDown.IsRunning))
+                                    {
+                                        this.pianoDown.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.B4, this.soundVelocity, 0, pianoDown, .25F));
+                                        this.pianoDown.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.A4, this.soundVelocity, .25F, pianoDown, .25F));
+                                        this.pianoDown.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.G4, this.soundVelocity, .5F, pianoDown, .25F));
+                                        this.pianoDown.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.F4, this.soundVelocity, .75F, pianoDown, .25F));
+                                        this.pianoDown.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.E4, this.soundVelocity, 1, pianoDown, .25F));
+                                        this.pianoDown.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.D4, this.soundVelocity, 1.25F, pianoDown, .25F));
+                                        this.pianoDown.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel1, Pitch.C4, this.soundVelocity, 1.5F, pianoDown, .25F));
+                                        this.pianoDown.Start();
+                                    }
                                 }
-                            }
+                            }                            
                         }
                         //raise both hands above the head when one is on one side and one is on the other
                         else if ((rightHandPos.X > kinectColorOut.Width / 2) && (leftHandPos.X < kinectColorOut.Width / 2)
@@ -258,6 +283,16 @@ namespace Kinectophone
                         {
                             this.soundOut.SendPercussion(Percussion.BassDrum1, this.soundVelocity);
                             this.soundOut.SendPercussion(Percussion.BassDrum2, this.soundVelocity);
+                        }
+                        else if ((distance(kneeLeftPos, leftHandPos) < 50.0))// && (distance(kneeRightPos, rightHandPos) < 50.0))
+                        {   
+                            if (!(this.beat1.IsRunning))
+                            {
+                                Console.Out.WriteLine("starting beat!");
+                                //this.beat1.Schedule(new NoteOnOffMessage(this.soundOut, Channel.Channel10, (Pitch)(Percussion.BassDrum1), this.soundVelocity, 0.5F, this.beat1, 12.5F));
+                                this.beat1.Start();
+                                Console.Out.WriteLine("started!");
+                            }
                         }
                         else
                         {
@@ -306,8 +341,10 @@ namespace Kinectophone
                                 //make sure the pitch is not "zero"
                                 if (!(pitchToPlay.Equals(Pitch.GSharpNeg1)))
                                 {
-                                    this.soundOut.SendNoteOn(Channel.Channel1, pitchToPlay, this.soundVelocity);
-
+                                    if (dictType != RegionToPitchDictType.GestureMusic)
+                                    {
+                                        this.soundOut.SendNoteOn(Channel.Channel1, pitchToPlay, this.soundVelocity);
+                                    }
                                     //Console.Out.WriteLine(pitchToPlay.ToString());
                                 }
                             }
@@ -371,7 +408,7 @@ namespace Kinectophone
 
             Dictionary<Tuple<int, int>, Pitch> intToPitch;
 
-            if (this.dictType == RegionToPitchDictType.Random)
+            if (this.dictType == RegionToPitchDictType.Random || this.dictType == RegionToPitchDictType.GestureMusic)
             {
                 intToPitch = new Dictionary<Tuple<int, int>, Pitch>();
 
